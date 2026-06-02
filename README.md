@@ -12,10 +12,19 @@ Logseq에서 `/para` slash command로 PARA 페이지를 만들고, 현재 커서
 - Logseq가 기본 `pages` 디렉토리에 먼저 만든 페이지 파일이 있으면 PARA 디렉토리로 이동 시도
 - 생성 후 현재 커서 위치에 `[[page-name]]` 링크 삽입
 
+## 설치
+
+Logseq Desktop에서 `Plugins` 화면을 열고 `Load unpacked plugin`을 눌러 이 프로젝트 폴더를 선택합니다.
+
+<img src="./assets/images/plugins-load-unpacked-plugin.png" alt="Logseq plugin load unpacked plugin screen" width="720" />
+
 ## 사용 방법
 
 1. Logseq 블록에서 `/para`를 입력합니다.
 2. slash command 목록에서 `PARA: Create Page`를 실행합니다.
+
+   <img src="./assets/images/command-0.png" alt="PARA slash command search result" width="500" />
+
 3. PARA 카테고리를 선택합니다.
    - `1` = Project
    - `2` = Area
@@ -23,10 +32,19 @@ Logseq에서 `/para` slash command로 PARA 페이지를 만들고, 현재 커서
    - `4` = Archive
    - `Esc` = 취소
 
+   <img src="./assets/images/command-1.png" alt="PARA category selection modal" width="500" />
+
 4. page name을 입력하고 Create를 누릅니다.
+
+   <img src="./assets/images/command-2.png" alt="PARA page name input modal" width="500" />
+
 5. 플러그인이 해당 PARA 디렉토리에 Markdown 파일을 준비한 뒤, 현재 커서 위치에 링크를 삽입합니다.
 
+   <img src="./assets/images/command-4.png" alt="Inserted Logseq page link" width="300" />
+
 예를 들어 Project를 선택하고 page name으로 `my-project`을 입력하면:
+
+<img src="./assets/images/command-3.png" alt="PARA page name example" width="500" />
 
 | 선택     | 입력 page name | 생성/이동 대상 파일           | 삽입 링크         |
 | -------- | -------------- | ----------------------------- | ----------------- |
@@ -42,6 +60,8 @@ Logseq에서 `/para` slash command로 PARA 페이지를 만들고, 현재 커서
 ## 설정
 
 Logseq 플러그인 설정에서 PARA 디렉토리 이름을 변경할 수 있습니다.
+
+<img src="./assets/images/plugins-setting.png" alt="PARA Pages plugin settings" width="720" />
 
 ```json
 {
