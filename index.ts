@@ -1,1 +1,158 @@
-console.log("Hello via Bun!");
+import "@logseq/libs";
+
+import { createParaFiles } from "./src/para-files";
+import { normalizePageName, pageNameToLinkName } from "./src/para-links";
+import { SETTINGS_SCHEMA } from "./src/settings";
+import type { ParaKind } from "./src/types";
+
+const PARA_KIND_OPTIONS: Array<{ kind: ParaKind; label: string }> = [
+  { kind: "project", label: "Project" },
+  { kind: "area", label: "Area" },
+  { kind: "resource", label: "Resource" },
+  { kind: "archive", label: "Archive" },
+];
+
+const showCreatePagePrompt = async (): Promise<{
+  kind: ParaKind;
+  pageName: string;
+} | null> => {
+  const doc = (globalThis as unknown as { document?: any }).document;
+  if (!doc?.body) {
+    await logseq.UI.showMsg("PARA: Prompt UI is unavailable.", "error");
+    return null;
+  }
+
+  return new Promise((resolve) => {
+    let selectedKind: ParaKind | null = null;
+
+    let keydownHandler: ((event: any) => void) | null = null;
+
+    const cleanup = (result: { kind: ParaKind; pageName: string } | null) => {
+      if (keydownHandler) doc.removeEventListener("keydown", keydownHandler);
+      doc.body.innerHTML = "";
+      void logseq.hideMainUI({ restoreEditingCursor: true });
+      resolve(result);
+    };
+
+    doc.body.innerHTML = `
+      <div id="para-create-page-modal" tabindex="-1" style="font-family: system-ui, sans-serif; box-sizing: border-box; padding: 16px; width: 100%; height: 100%; color: #1f2937; background: white; border: 1px solid #d1d5db; border-radius: 10px; box-shadow: 0 12px 40px rgba(0,0,0,.2); outline: none;">
+        <div style="font-size: 16px; font-weight: 700; margin-bottom: 12px;">PARA: Create Page</div>
+        <div id="para-kind-step">
+          <div style="font-size: 12px; color: #6b7280; margin-bottom: 8px;">Project / Area / Resource / Archive 선택 (1-4)</div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+            ${PARA_KIND_OPTIONS.map(
+              ({ kind, label }, index) =>
+                `<button data-kind="${kind}" style="padding: 10px; border: 1px solid #d1d5db; border-radius: 8px; background: #f9fafb; cursor: pointer;">${index + 1}. ${label}</button>`,
+            ).join("")}
+          </div>
+        </div>
+        <form id="para-name-step" style="display: none;">
+          <label style="display: block; font-size: 12px; color: #6b7280; margin-bottom: 8px;" for="para-page-name">page name 입력</label>
+          <input id="para-page-name" style="box-sizing: border-box; width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 8px;" placeholder="foo" />
+          <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 12px;">
+            <button id="para-cancel" type="button" style="padding: 8px 10px; border: 1px solid #d1d5db; border-radius: 8px; background: white; cursor: pointer;">Cancel</button>
+            <button type="submit" style="padding: 8px 10px; border: 1px solid #2563eb; border-radius: 8px; background: #2563eb; color: white; cursor: pointer;">Create</button>
+          </div>
+        </form>
+      </div>
+    `;
+
+    const modal = doc.getElementById("para-create-page-modal");
+    const kindStep = doc.getElementById("para-kind-step");
+    const nameStep = doc.getElementById("para-name-step");
+    const nameInput = doc.getElementById("para-page-name");
+    const cancelButton = doc.getElementById("para-cancel");
+
+    const selectKind = (kind: ParaKind) => {
+      selectedKind = kind;
+      kindStep.style.display = "none";
+      nameStep.style.display = "block";
+      nameInput.focus();
+    };
+
+    for (const button of Array.from(
+      doc.querySelectorAll("[data-kind]"),
+    ) as any[]) {
+      button.addEventListener("click", () => {
+        selectKind(button.getAttribute("data-kind") as ParaKind);
+      });
+    }
+
+    keydownHandler = (event: any) => {
+      if (event.key === "Escape") {
+        cleanup(null);
+        return;
+      }
+
+      if (kindStep.style.display === "none") return;
+
+      const optionIndex = Number(event.key) - 1;
+      const option = PARA_KIND_OPTIONS[optionIndex];
+      if (!option) return;
+
+      event.preventDefault();
+      selectKind(option.kind);
+    };
+    doc.addEventListener("keydown", keydownHandler);
+
+    cancelButton.addEventListener("click", () => cleanup(null));
+    nameStep.addEventListener("submit", (event: any) => {
+      event.preventDefault();
+      const pageName = normalizePageName(nameInput.value);
+      if (!selectedKind || pageName.length === 0) return;
+      cleanup({ kind: selectedKind, pageName });
+    });
+
+    void logseq.setMainUIInlineStyle({
+      position: "fixed",
+      zIndex: 9999,
+      width: "360px",
+      height: "230px",
+      left: "50%",
+      top: "50%",
+      transform: "translate(-50%, -50%)",
+      background: "transparent",
+    });
+    void logseq.showMainUI({ autoFocus: true });
+    setTimeout(() => modal.focus(), 0);
+  });
+};
+
+const createSingleParaPageFromPrompt = async (): Promise<void> => {
+  const result = await showCreatePagePrompt();
+  if (!result) return;
+
+  const { kind, pageName } = result;
+  if (pageName.length === 0) {
+    await logseq.UI.showMsg("PARA: Page name is required.", "warning");
+    return;
+  }
+
+  try {
+    const [createdPage] = await createParaFiles([{ kind, pageName }]);
+    await logseq.Editor.restoreEditingCursor();
+    await logseq.Editor.insertAtEditingCursor(
+      `[[${pageNameToLinkName(pageName)}]]`,
+    );
+
+    console.info("[logseq-para-pages] PARA page ready", createdPage);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    console.error("[logseq-para-pages]", error);
+    await logseq.UI.showMsg(`PARA: Create Page failed: ${message}`, "error");
+  }
+};
+
+const main = (): void => {
+  logseq.useSettingsSchema(SETTINGS_SCHEMA);
+
+  logseq.Editor.registerSlashCommand(
+    "PARA: Create Page",
+    createSingleParaPageFromPrompt,
+  );
+
+  console.info("[logseq-para-pages] loaded");
+  void logseq.UI.showMsg("PARA Pages plugin loaded.", "success");
+};
+
+logseq.ready(main).catch(console.error);
