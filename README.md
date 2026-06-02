@@ -1,15 +1,68 @@
 # logseq-para-pages
 
-To install dependencies:
+Logseq에서 `/para` slash command로 PARA 페이지를 만들고, 현재 커서 위치에 일반 Logseq 페이지 링크(`[[foo]]`)를 삽입하는 Logseq Desktop 플러그인입니다.
+
+## 주요 기능
+
+- `/para` slash command 전용
+- Project / Area / Resource / Archive 선택 UI 제공
+- 숫자 키 `1`, `2`, `3`, `4`로 빠른 PARA 카테고리 선택 지원
+- 입력한 page name으로 PARA 디렉토리에 Markdown 파일 생성
+- 이미 존재하는 파일은 재사용
+- Logseq가 기본 `pages` 디렉토리에 먼저 만든 페이지 파일이 있으면 PARA 디렉토리로 이동 시도
+- 생성 후 현재 커서 위치에 `[[page-name]]` 링크 삽입
+
+## 사용 방법
+
+1. Logseq 블록에서 `/para`를 입력합니다.
+2. slash command 목록에서 `PARA: Create Page`를 실행합니다.
+3. PARA 카테고리를 선택합니다.
+   - `1` = Project
+   - `2` = Area
+   - `3` = Resource
+   - `4` = Archive
+   - `Esc` = 취소
+
+4. page name을 입력하고 Create를 누릅니다.
+5. 플러그인이 해당 PARA 디렉토리에 Markdown 파일을 준비한 뒤, 현재 커서 위치에 링크를 삽입합니다.
+
+예를 들어 Project를 선택하고 page name으로 `my-project`을 입력하면:
+
+| 선택     | 입력 page name | 생성/이동 대상 파일           | 삽입 링크         |
+| -------- | -------------- | ----------------------------- | ----------------- |
+| Project  | `my-project`   | `01-projects/my-project.md`   | `[[my-project]]`  |
+| Area     | `my-area`      | `02-areas/my-area.md`         | `[[my-area]]`     |
+| Resource | `my-resource`  | `03-resources/my-resource.md` | `[[my-resource]]` |
+| Archive  | `old-page`     | `04-archive/old-page.md`      | `[[old-page]]`    |
+
+`name.md`처럼 `.md` 확장자를 입력해도 파일명/링크명에서는 제거됩니다.
+
+> Command Palette 방식은 사용하지 않습니다. 현재는 `/para` slash command만 지원합니다.
+
+## 설정
+
+Logseq 플러그인 설정에서 PARA 디렉토리 이름을 변경할 수 있습니다.
+
+```json
+{
+  "projectsDir": "01-projects",
+  "areasDir": "02-areas",
+  "resourcesDir": "03-resources",
+  "archiveDir": "04-archive"
+}
+```
+
+각 설정값은 현재 그래프 루트를 기준으로 하는 상대 디렉토리입니다.
+
+## 개발
 
 ```bash
 bun install
+bun run test
+bun run typecheck
+bun run build
 ```
 
-To run:
+빌드 후 Logseq에서 이 프로젝트 폴더를 플러그인으로 로드하세요.
 
-```bash
-bun run index.ts
-```
-
-This project was created using `bun init` in bun v1.3.14. [Bun](https://bun.com) is a fast all-in-one JavaScript runtime.
+> 파일 시스템 접근이 필요하므로 현재 구현은 Logseq Desktop 환경을 전제로 합니다.
