@@ -123,10 +123,6 @@ const createSingleParaPageFromPrompt = async (): Promise<void> => {
   if (!result) return;
 
   const { kind, pageName } = result;
-  if (pageName.length === 0) {
-    await logseq.UI.showMsg("PARA: Page name is required.", "warning");
-    return;
-  }
 
   try {
     const [createdPage] = await createParaFiles([{ kind, pageName }]);

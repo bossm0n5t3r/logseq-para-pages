@@ -16,7 +16,6 @@ export type FsAdapter = {
 
 export type NodeLikePath = {
   join(...parts: string[]): string;
-  resolve(...parts: string[]): string;
 };
 
 export type HostApis = {

@@ -9,7 +9,6 @@ const posixPath: NodeLikePath = {
       .filter((part) => part.length > 0)
       .join("/")
       .replace(/\/+/g, "/"),
-  resolve: (...parts) => posixPath.join(...parts),
 };
 
 describe("toAbsoluteGraphPath", () => {

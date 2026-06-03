@@ -10,9 +10,6 @@ const browserPath: NodeLikePath = {
       .replace(/\/+/g, "/");
     return joined.replace(/([^:])\/+/g, "$1/");
   },
-  resolve(...parts: string[]): string {
-    return this.join(...parts);
-  },
 };
 
 const getRequireFunction = (): ((name: string) => unknown) | null => {
