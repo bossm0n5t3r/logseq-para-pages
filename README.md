@@ -14,7 +14,18 @@ Logseq에서 `/para` slash command로 PARA 페이지를 만들고, 현재 커서
 
 ## 설치
 
-Logseq Desktop에서 `Plugins` 화면을 열고 `Load unpacked plugin`을 눌러 이 프로젝트 폴더를 선택합니다.
+먼저 이 프로젝트를 다운로드하거나 `git clone`으로 로컬에 받아둡니다.
+
+```bash
+git clone https://codeberg.org/bossm0n5t3r/logseq-para-pages.git
+cd logseq-para-pages
+```
+
+Logseq Desktop 설정의 `Advanced`에서 `Developer mode`를 활성화합니다.
+
+<img src="./assets/images/settings-advanced-enable-developer-mode.png" alt="Logseq advanced settings developer mode toggle" width="720" />
+
+그런 다음 `Plugins` 화면을 열고 `Load unpacked plugin`을 눌러 로컬에 받아둔 이 프로젝트 폴더를 선택합니다.
 
 <img src="./assets/images/plugins-load-unpacked-plugin.png" alt="Logseq plugin load unpacked plugin screen" width="720" />
 
