@@ -7,6 +7,7 @@ Logseq에서 `/para` slash command로 PARA 페이지를 만들고, 현재 커서
 - `/para` slash command 전용
 - Project / Area / Resource / Archive 선택 UI 제공
 - 숫자 키 `1`, `2`, `3`, `4`로 빠른 PARA 카테고리 선택 지원
+- 현재 페이지가 PARA 디렉토리 안에 있으면 해당 카테고리를 자동 선택
 - 입력한 page name으로 PARA 디렉토리에 Markdown 파일 생성
 - 이미 존재하는 파일은 재사용
 - Logseq가 기본 `pages` 디렉토리에 먼저 만든 페이지 파일이 있으면 PARA 디렉토리로 이동 시도
@@ -37,6 +38,8 @@ Logseq Desktop 설정의 `Advanced`에서 `Developer mode`를 활성화합니다
    <img src="./assets/images/command-0.png" alt="PARA slash command search result" width="500" />
 
 3. PARA 카테고리를 선택합니다.
+   - 현재 페이지가 `01-projects`, `02-areas`, `03-resources`, `04-archive` 같은 PARA 디렉토리 안에 있으면 해당 카테고리가 자동 선택되고 page name 입력 단계로 바로 이동합니다.
+   - 자동 선택된 카테고리를 바꾸려면 `Change category`를 누릅니다.
    - `1` = Project
    - `2` = Area
    - `3` = Resource
@@ -44,6 +47,10 @@ Logseq Desktop 설정의 `Advanced`에서 `Developer mode`를 활성화합니다
    - `Esc` = 취소
 
    <img src="./assets/images/command-1.png" alt="PARA category selection modal" width="500" />
+
+   현재 페이지가 PARA 디렉토리 안에 있으면 아래처럼 현재 위치 기반 카테고리가 자동 선택됩니다.
+
+   <img src="./assets/images/command-5.png" alt="PARA current category auto selection modal" width="500" />
 
 4. page name을 입력하고 Create를 누릅니다.
 

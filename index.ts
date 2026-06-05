@@ -1,8 +1,9 @@
 import "@logseq/libs";
 
-import { createParaFiles } from "./src/para-files";
+import { inferCurrentParaKind } from "./src/current-para-kind";
+import { createParaFiles, extractGraphPath } from "./src/para-files";
 import { normalizePageName, pageNameToLinkName } from "./src/para-links";
-import { SETTINGS_SCHEMA } from "./src/settings";
+import { getSettings, SETTINGS_SCHEMA } from "./src/settings";
 import type { ParaKind } from "./src/types";
 
 const PARA_KIND_OPTIONS: Array<{ kind: ParaKind; label: string }> = [
@@ -12,7 +13,15 @@ const PARA_KIND_OPTIONS: Array<{ kind: ParaKind; label: string }> = [
   { kind: "archive", label: "Archive" },
 ];
 
-const showCreatePagePrompt = async (): Promise<{
+const labelForKind = (kind: ParaKind): string => {
+  return (
+    PARA_KIND_OPTIONS.find((option) => option.kind === kind)?.label ?? kind
+  );
+};
+
+const showCreatePagePrompt = async (
+  initialKind: ParaKind | null = null,
+): Promise<{
   kind: ParaKind;
   pageName: string;
 } | null> => {
@@ -23,7 +32,7 @@ const showCreatePagePrompt = async (): Promise<{
   }
 
   return new Promise((resolve) => {
-    let selectedKind: ParaKind | null = null;
+    let selectedKind: ParaKind | null = initialKind;
 
     let keydownHandler: ((event: any) => void) | null = null;
 
@@ -48,8 +57,10 @@ const showCreatePagePrompt = async (): Promise<{
         </div>
         <form id="para-name-step" style="display: none;">
           <label style="display: block; font-size: 12px; color: #6b7280; margin-bottom: 8px;" for="para-page-name">page name 입력</label>
+          <div id="para-current-kind" style="display: none; font-size: 12px; color: #2563eb; margin-bottom: 8px;"></div>
           <input id="para-page-name" style="box-sizing: border-box; width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 8px;" placeholder="foo" />
           <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 12px;">
+            <button id="para-change-kind" type="button" style="display: none; padding: 8px 10px; border: 1px solid #d1d5db; border-radius: 8px; background: white; cursor: pointer;">Change category</button>
             <button id="para-cancel" type="button" style="padding: 8px 10px; border: 1px solid #d1d5db; border-radius: 8px; background: white; cursor: pointer;">Cancel</button>
             <button type="submit" style="padding: 8px 10px; border: 1px solid #2563eb; border-radius: 8px; background: #2563eb; color: white; cursor: pointer;">Create</button>
           </div>
@@ -61,6 +72,8 @@ const showCreatePagePrompt = async (): Promise<{
     const kindStep = doc.getElementById("para-kind-step");
     const nameStep = doc.getElementById("para-name-step");
     const nameInput = doc.getElementById("para-page-name");
+    const currentKindLabel = doc.getElementById("para-current-kind");
+    const changeKindButton = doc.getElementById("para-change-kind");
     const cancelButton = doc.getElementById("para-cancel");
 
     const selectKind = (kind: ParaKind) => {
@@ -69,6 +82,15 @@ const showCreatePagePrompt = async (): Promise<{
       nameStep.style.display = "block";
       nameInput.focus();
     };
+
+    if (initialKind) {
+      kindStep.style.display = "none";
+      nameStep.style.display = "block";
+      currentKindLabel.style.display = "block";
+      currentKindLabel.textContent = `현재 위치 기반: ${labelForKind(initialKind)}`;
+      changeKindButton.style.display = "inline-block";
+      setTimeout(() => nameInput.focus(), 0);
+    }
 
     for (const button of Array.from(
       doc.querySelectorAll("[data-kind]"),
@@ -95,6 +117,15 @@ const showCreatePagePrompt = async (): Promise<{
     };
     doc.addEventListener("keydown", keydownHandler);
 
+    changeKindButton.addEventListener("click", () => {
+      selectedKind = null;
+      currentKindLabel.style.display = "none";
+      changeKindButton.style.display = "none";
+      nameStep.style.display = "none";
+      kindStep.style.display = "block";
+      modal.focus();
+    });
+
     cancelButton.addEventListener("click", () => cleanup(null));
     nameStep.addEventListener("submit", (event: any) => {
       event.preventDefault();
@@ -107,7 +138,7 @@ const showCreatePagePrompt = async (): Promise<{
       position: "fixed",
       zIndex: 9999,
       width: "360px",
-      height: "230px",
+      height: "250px",
       left: "50%",
       top: "50%",
       transform: "translate(-50%, -50%)",
@@ -118,8 +149,24 @@ const showCreatePagePrompt = async (): Promise<{
   });
 };
 
+const inferInitialKind = async (): Promise<ParaKind | null> => {
+  try {
+    const graph = await logseq.App.getCurrentGraph();
+    const graphPath = extractGraphPath(graph);
+    if (!graphPath) return null;
+
+    return await inferCurrentParaKind(graphPath, getSettings());
+  } catch (error) {
+    console.warn(
+      "[logseq-para-pages] current PARA kind inference failed",
+      error,
+    );
+    return null;
+  }
+};
+
 const createSingleParaPageFromPrompt = async (): Promise<void> => {
-  const result = await showCreatePagePrompt();
+  const result = await showCreatePagePrompt(await inferInitialKind());
   if (!result) return;
 
   const { kind, pageName } = result;

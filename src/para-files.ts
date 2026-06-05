@@ -4,7 +4,7 @@ import { normalizePageName, pageNameToFileName } from "./para-links";
 import { dirForKind, getSettings } from "./settings";
 import type { CreatedPage, PageStatus, ParaLink } from "./types";
 
-const extractGraphPath = (
+export const extractGraphPath = (
   graph: { path?: unknown; url?: unknown } | null,
 ): string | null => {
   if (!graph) return null;
