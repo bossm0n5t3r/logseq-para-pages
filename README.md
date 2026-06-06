@@ -9,20 +9,24 @@ Logseq에서 `/para` slash command로 PARA 페이지를 만들고, 현재 커서
 - 숫자 키 `1`, `2`, `3`, `4`로 빠른 PARA 카테고리 선택 지원
 - 현재 페이지가 PARA 디렉토리 안에 있으면 해당 카테고리를 자동 선택
 - 입력한 page name으로 PARA 디렉토리에 Markdown 파일 생성
-- 생성/이동/기존 페이지에 `- metadata` 블록과 `para:: <kind>` 프로퍼티 추가
-- 이미 `para:: ...` 프로퍼티가 있으면 중복 추가하지 않음
+- 생성/이동/기존 페이지에 `- metadata` 블록과 `- para:: <kind>` 프로퍼티 추가
+- 이미 `- para:: ...` 프로퍼티가 있으면 중복 추가하지 않음
 - 이미 존재하는 파일은 재사용
 - Logseq가 기본 `pages` 디렉토리에 먼저 만든 페이지 파일이 있으면 PARA 디렉토리로 이동 시도
 - metadata가 Logseq에 인덱싱될 때까지 짧게 기다린 뒤 현재 커서 위치에 `[[page-name]]` 링크 삽입
 
 ## 설치
 
-먼저 이 프로젝트를 다운로드하거나 `git clone`으로 로컬에 받아둡니다.
+먼저 이 프로젝트를 다운로드하거나 `git clone`으로 로컬에 받아둔 뒤 의존성을 설치하고 브라우저용 번들을 빌드합니다.
 
 ```bash
 git clone https://codeberg.org/bossm0n5t3r/logseq-para-pages.git
 cd logseq-para-pages
+bun install
+bun run build
 ```
+
+> `index.html`은 `dist/index.js`를 로드합니다. 소스 변경 후에는 Logseq에서 다시 확인하기 전에 `bun run build`를 실행하세요.
 
 Logseq Desktop 설정의 `Advanced`에서 `Developer mode`를 활성화합니다.
 
@@ -66,13 +70,13 @@ Logseq Desktop 설정의 `Advanced`에서 `Developer mode`를 활성화합니다
 
 ```markdown
 - metadata
-  para:: project
+  - para:: project
 -
 ```
 
 파일 준비 후 Logseq가 metadata 블록을 인식하면 현재 블록에는 `[[my-project]]` 링크가 삽입됩니다.
 
-이미 같은 파일이 있거나 Logseq 기본 `pages` 디렉토리에서 PARA 디렉토리로 이동된 파일도 `para:: ...` 프로퍼티가 없으면 자동으로 추가됩니다.
+이미 같은 파일이 있거나 Logseq 기본 `pages` 디렉토리에서 PARA 디렉토리로 이동된 파일도 `- para:: ...` 프로퍼티가 없으면 자동으로 추가됩니다. 기존 형식인 `para:: ...`만 있는 경우에는 새 형식으로 인식하지 않고 `- para:: ...`를 추가합니다.
 
 <img src="./assets/images/command-3.png" alt="PARA page name example" width="500" />
 
@@ -108,17 +112,18 @@ Logseq 플러그인 설정에서 PARA 디렉토리 이름을 변경할 수 있�
 
 ```bash
 bun install
-bun run test
+bun test
 bun run typecheck
 bun run build
 ```
 
-빌드 후 Logseq에서 이 프로젝트 폴더를 플러그인으로 로드하세요.
+빌드 후 Logseq에서 이 프로젝트 폴더를 플러그인으로 로드하세요. 코드 변경사항을 Logseq에 반영하려면 다시 빌드한 뒤 플러그인을 reload하세요.
 
 ### 구현 메모
 
 - metadata Markdown 생성/수정 로직은 `src/para-metadata.ts`에 있습니다.
-- 새 파일 생성뿐 아니라 기존/이동된 파일에도 `para:: <kind>` 프로퍼티를 보강합니다.
+- 새 파일 생성뿐 아니라 기존/이동된 파일에도 `- para:: <kind>` 프로퍼티를 보강합니다.
+- 기존 `para:: <kind>` 형식은 중복 여부 확인 대상으로 사용하지 않습니다.
 - `/para` 실행 후 `logseq.Editor.getPageBlocksTree()`로 metadata 인덱싱을 짧게 polling합니다.
 - metadata polling 로그는 개발자 콘솔에서 `[logseq-para-pages] metadata ...` prefix로 확인할 수 있습니다.
 
