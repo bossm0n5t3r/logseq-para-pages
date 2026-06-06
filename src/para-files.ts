@@ -1,6 +1,7 @@
 import { getFileSystemAdapter } from "./fs-adapter";
 import { candidateDefaultPagePaths } from "./page-paths";
 import { normalizePageName, pageNameToFileName } from "./para-links";
+import { addMetadataProperty, makeInitialMarkdown } from "./para-metadata";
 import { dirForKind, getSettings } from "./settings";
 import type { CreatedPage, PageStatus, ParaLink } from "./types";
 
@@ -18,10 +19,6 @@ export const extractGraphPath = (
   }
 
   return null;
-};
-
-const makeInitialMarkdown = (): string => {
-  return "- \n";
 };
 
 const listMarkdownFilesOfCurrentGraph = async (): Promise<string[]> => {
@@ -118,13 +115,22 @@ export const createParaFiles = async (
           filePath,
         });
       } else {
-        await node.fs.writeFile(filePath, makeInitialMarkdown());
+        await node.fs.writeFile(filePath, makeInitialMarkdown(match.kind));
         exists = await node.fs.exists(filePath);
         if (!exists) {
           throw new Error(`Target file was not created: ${filePath}`);
         }
         status = "created";
         console.info("[logseq-para-pages] created page file", { filePath });
+      }
+    }
+
+    if (exists && status !== "created") {
+      const content = await node.fs.readFile(filePath);
+      const contentWithMetadata = addMetadataProperty(content, match.kind);
+      if (contentWithMetadata !== content) {
+        await node.fs.overwriteFile(filePath, contentWithMetadata);
+        console.info("[logseq-para-pages] updated page metadata", { filePath });
       }
     }
 

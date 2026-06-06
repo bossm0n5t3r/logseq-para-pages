@@ -3,6 +3,7 @@ import "@logseq/libs";
 import { inferCurrentParaKind } from "./src/current-para-kind";
 import { createParaFiles, extractGraphPath } from "./src/para-files";
 import { normalizePageName, pageNameToLinkName } from "./src/para-links";
+import { blockTreeHasMetadata } from "./src/para-metadata";
 import { getSettings, SETTINGS_SCHEMA } from "./src/settings";
 import type { ParaKind } from "./src/types";
 
@@ -17,6 +18,60 @@ const labelForKind = (kind: ParaKind): string => {
   return (
     PARA_KIND_OPTIONS.find((option) => option.kind === kind)?.label ?? kind
   );
+};
+
+const METADATA_INDEX_TIMEOUT_MS = 3000;
+const METADATA_INDEX_POLL_INTERVAL_MS = 150;
+
+const sleep = (ms: number): Promise<void> => {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+};
+
+const waitForPageMetadataIndexed = async (
+  pageName: string,
+  timeoutMs = METADATA_INDEX_TIMEOUT_MS,
+): Promise<void> => {
+  const startedAt = Date.now();
+  const linkPageName = pageNameToLinkName(pageName);
+  let attempts = 0;
+  let lastBlockCount = 0;
+  let lastError: unknown = null;
+
+  console.info("[logseq-para-pages] metadata index polling started", {
+    pageName: linkPageName,
+    timeoutMs,
+  });
+
+  while (Date.now() - startedAt < timeoutMs) {
+    attempts += 1;
+
+    try {
+      const blocks = await logseq.Editor.getPageBlocksTree(linkPageName);
+      lastBlockCount = Array.isArray(blocks) ? blocks.length : 0;
+
+      if (Array.isArray(blocks) && blockTreeHasMetadata(blocks)) {
+        console.info("[logseq-para-pages] metadata indexed", {
+          pageName: linkPageName,
+          elapsedMs: Date.now() - startedAt,
+          attempts,
+          blockCount: lastBlockCount,
+        });
+        return;
+      }
+    } catch (error) {
+      lastError = error;
+    }
+
+    await sleep(METADATA_INDEX_POLL_INTERVAL_MS);
+  }
+
+  console.warn("[logseq-para-pages] metadata index polling timed out", {
+    pageName: linkPageName,
+    elapsedMs: Date.now() - startedAt,
+    attempts,
+    lastBlockCount,
+    lastError,
+  });
 };
 
 const showCreatePagePrompt = async (
@@ -173,6 +228,7 @@ const createSingleParaPageFromPrompt = async (): Promise<void> => {
 
   try {
     const [createdPage] = await createParaFiles([{ kind, pageName }]);
+    await waitForPageMetadataIndexed(pageName);
     await logseq.Editor.restoreEditingCursor();
     await logseq.Editor.insertAtEditingCursor(
       `[[${pageNameToLinkName(pageName)}]]`,

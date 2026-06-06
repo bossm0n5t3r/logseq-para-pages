@@ -11,7 +11,9 @@ export type FsAdapter = {
   exists(path: string): Promise<boolean>;
   mkdir(path: string): Promise<void>;
   rename(oldPath: string, newPath: string): Promise<void>;
+  readFile(path: string): Promise<string>;
   writeFile(path: string, data: string): Promise<void>;
+  overwriteFile(path: string, data: string): Promise<void>;
 };
 
 export type NodeLikePath = {

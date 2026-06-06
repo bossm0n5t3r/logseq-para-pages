@@ -38,6 +38,7 @@ const createNodeFileSystemAdapter = (
     existsSync(path: string): boolean;
     mkdirSync(path: string, opts?: { recursive?: boolean }): void;
     renameSync(oldPath: string, newPath: string): void;
+    readFileSync(path: string, opts?: { encoding?: string }): string;
     writeFileSync(
       path: string,
       data: string,
@@ -50,8 +51,11 @@ const createNodeFileSystemAdapter = (
       exists: async (path) => fs.existsSync(path),
       mkdir: async (path) => fs.mkdirSync(path, { recursive: true }),
       rename: async (oldPath, newPath) => fs.renameSync(oldPath, newPath),
+      readFile: async (path) => fs.readFileSync(path, { encoding: "utf8" }),
       writeFile: async (path, data) =>
         fs.writeFileSync(path, data, { encoding: "utf8", flag: "wx" }),
+      overwriteFile: async (path, data) =>
+        fs.writeFileSync(path, data, { encoding: "utf8" }),
     },
     path: requireFn("path") as NodeLikePath,
   };
@@ -104,9 +108,16 @@ const createHostFileSystemAdapter = (apis: HostApis): FileSystemAdapter => {
       rename: async (oldPath, newPath) => {
         await apis.doAction(["rename", oldPath, newPath]);
       },
+      readFile: async (path) => {
+        const content = await apis.doAction(["readFile", path]);
+        return typeof content === "string" ? content : String(content ?? "");
+      },
       writeFile: async (path, data) => {
         // Logseq's electron handler signature is:
         // ['writeFile', repo, path, content]
+        await apis.doAction(["writeFile", "", path, data]);
+      },
+      overwriteFile: async (path, data) => {
         await apis.doAction(["writeFile", "", path, data]);
       },
     },
