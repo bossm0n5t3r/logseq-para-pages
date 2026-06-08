@@ -2,76 +2,58 @@ import { describe, expect, test } from "bun:test";
 
 import {
   addMetadataProperty,
-  blockTreeHasMetadata,
   hasMetadataProperty,
   makeInitialMarkdown,
+  makeMetadataBlock,
 } from "./para-metadata";
 
+describe("makeMetadataBlock", () => {
+  test("creates a top-level PARA page property", () => {
+    expect(makeMetadataBlock("project")).toBe("para:: project");
+  });
+});
+
 describe("makeInitialMarkdown", () => {
-  test("creates a metadata block with the PARA property", () => {
-    expect(makeInitialMarkdown("project")).toBe(
-      "- metadata\n  - para:: project\n- \n",
-    );
+  test("creates initial page content with a PARA page property", () => {
+    expect(makeInitialMarkdown("project")).toBe("para:: project\n-\n");
   });
 });
 
 describe("hasMetadataProperty", () => {
-  test("detects an existing PARA metadata property", () => {
+  test("detects an existing top-level PARA page property", () => {
+    expect(hasMetadataProperty("para:: area\n- foo\n")).toBe(true);
+  });
+
+  test("returns false when the PARA page property is missing", () => {
+    expect(hasMetadataProperty("- foo\n")).toBe(false);
+  });
+
+  test("does not treat the old nested metadata block format as a page property", () => {
     expect(hasMetadataProperty("- metadata\n  - para:: area\n- foo\n")).toBe(
-      true,
-    );
-  });
-
-  test("returns false when the PARA metadata property is missing", () => {
-    expect(hasMetadataProperty("- metadata\n- foo\n")).toBe(false);
-  });
-
-  test("does not detect the old non-block PARA property format", () => {
-    expect(hasMetadataProperty("- metadata\n  para:: area\n- foo\n")).toBe(
       false,
     );
   });
 });
 
 describe("addMetadataProperty", () => {
-  test("adds metadata to empty content", () => {
-    expect(addMetadataProperty("", "resource")).toBe(
-      "- metadata\n  - para:: resource\n- \n",
-    );
+  test("adds the PARA page property to empty content", () => {
+    expect(addMetadataProperty("", "resource")).toBe("para:: resource\n-\n");
   });
 
-  test("adds the PARA property below an existing metadata block", () => {
-    expect(addMetadataProperty("- metadata\n- body\n", "archive")).toBe(
-      "- metadata\n  - para:: archive\n- body\n",
-    );
-  });
-
-  test("does not duplicate an existing PARA property", () => {
-    const content = "- metadata\n  - para:: project\n- body\n";
-    expect(addMetadataProperty(content, "project")).toBe(content);
-  });
-
-  test("prepends metadata before existing content", () => {
+  test("prepends the PARA page property to existing content", () => {
     expect(addMetadataProperty("- body\n", "area")).toBe(
-      "- metadata\n  - para:: area\n- body\n",
+      "para:: area\n- body\n",
     );
   });
-});
 
-describe("blockTreeHasMetadata", () => {
-  test("detects a metadata block", () => {
-    expect(blockTreeHasMetadata([{ content: "metadata" }])).toBe(true);
+  test("trims leading whitespace before prepending the PARA page property", () => {
+    expect(addMetadataProperty("\n\n- body\n", "archive")).toBe(
+      "para:: archive\n- body\n",
+    );
   });
 
-  test("detects a nested PARA property block", () => {
-    expect(
-      blockTreeHasMetadata([
-        { content: "body", children: [{ content: "- para:: project" }] },
-      ]),
-    ).toBe(true);
-  });
-
-  test("returns false when metadata is missing", () => {
-    expect(blockTreeHasMetadata([{ content: "body" }])).toBe(false);
+  test("does not duplicate an existing PARA page property", () => {
+    const content = "para:: project\n- body\n";
+    expect(addMetadataProperty(content, "project")).toBe(content);
   });
 });

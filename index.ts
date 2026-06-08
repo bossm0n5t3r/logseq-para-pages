@@ -3,7 +3,6 @@ import "@logseq/libs";
 import { inferCurrentParaKind } from "./src/current-para-kind";
 import { createParaFiles, extractGraphPath } from "./src/para-files";
 import { normalizePageName, pageNameToLinkName } from "./src/para-links";
-import { blockTreeHasMetadata } from "./src/para-metadata";
 import { getSettings, SETTINGS_SCHEMA } from "./src/settings";
 import type { ParaKind } from "./src/types";
 
@@ -37,7 +36,7 @@ const waitForPageMetadataIndexed = async (
   let lastBlockCount = 0;
   let lastError: unknown = null;
 
-  console.info("[logseq-para-pages] metadata index polling started", {
+  console.info("[logseq-para-pages] page index polling started", {
     pageName: linkPageName,
     timeoutMs,
   });
@@ -49,8 +48,8 @@ const waitForPageMetadataIndexed = async (
       const blocks = await logseq.Editor.getPageBlocksTree(linkPageName);
       lastBlockCount = Array.isArray(blocks) ? blocks.length : 0;
 
-      if (Array.isArray(blocks) && blockTreeHasMetadata(blocks)) {
-        console.info("[logseq-para-pages] metadata indexed", {
+      if (Array.isArray(blocks) && blocks.length > 0) {
+        console.info("[logseq-para-pages] page indexed", {
           pageName: linkPageName,
           elapsedMs: Date.now() - startedAt,
           attempts,
@@ -65,7 +64,7 @@ const waitForPageMetadataIndexed = async (
     await sleep(METADATA_INDEX_POLL_INTERVAL_MS);
   }
 
-  console.warn("[logseq-para-pages] metadata index polling timed out", {
+  console.warn("[logseq-para-pages] page index polling timed out", {
     pageName: linkPageName,
     elapsedMs: Date.now() - startedAt,
     attempts,
