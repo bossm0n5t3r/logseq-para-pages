@@ -132,7 +132,6 @@ bun run build
 
 - PARA 프로퍼티 Markdown 생성/수정 로직은 `src/para-metadata.ts`에 있습니다.
 - 새 파일 생성뿐 아니라 기존/이동된 파일에도 `para:: <kind>` 프로퍼티를 보강합니다.
-- `/para` 실행 후 `logseq.Editor.getPageBlocksTree()`로 페이지 인덱싱을 짧게 polling합니다.
-- 페이지 polling 로그는 개발자 콘솔에서 `[logseq-para-pages] page ...` prefix로 확인할 수 있습니다.
+- 문서 파일 생성 후 현재 편집 커서에 페이지 링크를 삽입하고, 커서 삽입 실패 시 원래 블록 끝에 링크를 추가합니다.
 
 > 파일 시스템 접근이 필요하므로 현재 구현은 Logseq Desktop 환경을 전제로 합니다.

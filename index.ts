@@ -19,60 +19,6 @@ const labelForKind = (kind: ParaKind): string => {
   );
 };
 
-const METADATA_INDEX_TIMEOUT_MS = 3000;
-const METADATA_INDEX_POLL_INTERVAL_MS = 150;
-
-const sleep = (ms: number): Promise<void> => {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-};
-
-const waitForPageMetadataIndexed = async (
-  pageName: string,
-  timeoutMs = METADATA_INDEX_TIMEOUT_MS,
-): Promise<void> => {
-  const startedAt = Date.now();
-  const linkPageName = pageNameToLinkName(pageName);
-  let attempts = 0;
-  let lastBlockCount = 0;
-  let lastError: unknown = null;
-
-  console.info("[logseq-para-pages] page index polling started", {
-    pageName: linkPageName,
-    timeoutMs,
-  });
-
-  while (Date.now() - startedAt < timeoutMs) {
-    attempts += 1;
-
-    try {
-      const blocks = await logseq.Editor.getPageBlocksTree(linkPageName);
-      lastBlockCount = Array.isArray(blocks) ? blocks.length : 0;
-
-      if (Array.isArray(blocks) && blocks.length > 0) {
-        console.info("[logseq-para-pages] page indexed", {
-          pageName: linkPageName,
-          elapsedMs: Date.now() - startedAt,
-          attempts,
-          blockCount: lastBlockCount,
-        });
-        return;
-      }
-    } catch (error) {
-      lastError = error;
-    }
-
-    await sleep(METADATA_INDEX_POLL_INTERVAL_MS);
-  }
-
-  console.warn("[logseq-para-pages] page index polling timed out", {
-    pageName: linkPageName,
-    elapsedMs: Date.now() - startedAt,
-    attempts,
-    lastBlockCount,
-    lastError,
-  });
-};
-
 const showCreatePagePrompt = async (
   initialKind: ParaKind | null = null,
 ): Promise<{
@@ -203,6 +149,51 @@ const showCreatePagePrompt = async (
   });
 };
 
+const appendLinkToBlock = async (
+  blockUuid: string,
+  pageLink: string,
+): Promise<void> => {
+  const block = await logseq.Editor.getBlock(blockUuid);
+  if (!block) throw new Error("Original block is unavailable.");
+
+  const content = typeof block.content === "string" ? block.content : "";
+  if (content.includes(pageLink)) return;
+
+  const separator = content.length === 0 || /\s$/.test(content) ? "" : " ";
+  await logseq.Editor.updateBlock(
+    blockUuid,
+    `${content}${separator}${pageLink}`,
+  );
+};
+
+const insertPageLink = async (
+  pageLink: string,
+  fallbackBlockUuid: string | null,
+): Promise<void> => {
+  try {
+    await logseq.Editor.restoreEditingCursor();
+    await logseq.Editor.insertAtEditingCursor(pageLink);
+    return;
+  } catch (insertError) {
+    console.warn(
+      "[logseq-para-pages] insertAtEditingCursor failed; falling back to block append",
+      insertError,
+    );
+
+    if (!fallbackBlockUuid) throw insertError;
+
+    try {
+      await appendLinkToBlock(fallbackBlockUuid, pageLink);
+    } catch (fallbackError) {
+      console.error(
+        "[logseq-para-pages] fallback block append failed",
+        fallbackError,
+      );
+      throw insertError;
+    }
+  }
+};
+
 const inferInitialKind = async (): Promise<ParaKind | null> => {
   try {
     const graph = await logseq.App.getCurrentGraph();
@@ -219,7 +210,10 @@ const inferInitialKind = async (): Promise<ParaKind | null> => {
   }
 };
 
-const createSingleParaPageFromPrompt = async (): Promise<void> => {
+const createSingleParaPageFromPrompt = async (event?: {
+  uuid?: string;
+}): Promise<void> => {
+  const fallbackBlockUuid = event?.uuid ?? null;
   const result = await showCreatePagePrompt(await inferInitialKind());
   if (!result) return;
 
@@ -227,10 +221,9 @@ const createSingleParaPageFromPrompt = async (): Promise<void> => {
 
   try {
     const [createdPage] = await createParaFiles([{ kind, pageName }]);
-    await waitForPageMetadataIndexed(pageName);
-    await logseq.Editor.restoreEditingCursor();
-    await logseq.Editor.insertAtEditingCursor(
+    await insertPageLink(
       `[[${pageNameToLinkName(pageName)}]]`,
+      fallbackBlockUuid,
     );
 
     console.info("[logseq-para-pages] PARA page ready", createdPage);
