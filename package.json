@@ -2,6 +2,8 @@
   "name": "logseq-para-pages",
   "version": "0.1.0",
   "description": "Create PARA Markdown files from Logseq page-link patterns.",
+  "author": "bossm0n5t3r",
+  "license": "MIT",
   "main": "index.html",
   "module": "index.ts",
   "type": "module",
