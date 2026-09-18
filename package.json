@@ -4,6 +4,14 @@
   "description": "Create PARA Markdown files from Logseq page-link patterns.",
   "author": "bossm0n5t3r",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bossm0n5t3r/logseq-para-pages.git"
+  },
+  "homepage": "https://github.com/bossm0n5t3r/logseq-para-pages#readme",
+  "bugs": {
+    "url": "https://github.com/bossm0n5t3r/logseq-para-pages/issues"
+  },
   "main": "index.html",
   "module": "index.ts",
   "type": "module",
@@ -11,7 +19,8 @@
   "scripts": {
     "build": "bun build ./index.ts --outdir ./dist --target browser --format esm --sourcemap=external",
     "test": "bun test",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "format": "prettier --write ."
   },
   "keywords": [
     "logseq",
@@ -21,11 +30,13 @@
   "logseq": {
     "id": "logseq-para-pages",
     "title": "PARA Pages",
-    "icon": "./icon.svg"
+    "icon": "./icon.svg",
+    "unsupportedGraphType": "db"
   },
   "devDependencies": {
     "@logseq/libs": "^0.0.17",
-    "@types/bun": "latest"
+    "@types/bun": "latest",
+    "prettier": "^3.9.8"
   },
   "peerDependencies": {
     "typescript": "^5"
