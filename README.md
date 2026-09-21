@@ -35,18 +35,18 @@ bun run build
 
 Logseq Desktop의 `Settings` → `Advanced`에서 `Developer mode`를 활성화합니다.
 
-<img src="./assets/images/settings-advanced-enable-developer-mode.png" alt="Logseq 고급 설정의 개발자 모드" width="720" />
+<img src="https://raw.githubusercontent.com/bossm0n5t3r/logseq-para-pages/master/assets/images/settings-advanced-enable-developer-mode.png" alt="Logseq 고급 설정의 개발자 모드" width="720" />
 
 그런 다음 `Plugins` 화면에서 `Load unpacked plugin`을 누르고 이 프로젝트 폴더를 선택합니다.
 
-<img src="./assets/images/plugins-load-unpacked-plugin.png" alt="Logseq의 압축 해제된 플러그인 불러오기 화면" width="720" />
+<img src="https://raw.githubusercontent.com/bossm0n5t3r/logseq-para-pages/master/assets/images/plugins-load-unpacked-plugin.png" alt="Logseq의 압축 해제된 플러그인 불러오기 화면" width="720" />
 
 ## 사용 방법
 
 1. Logseq 블록에서 `/para`를 입력합니다.
 2. 슬래시 명령어 목록에서 `PARA: Create Page`를 실행합니다.
 
-   <img src="./assets/images/command-0.png" alt="PARA 슬래시 명령어 검색 결과" width="500" />
+   <img src="https://raw.githubusercontent.com/bossm0n5t3r/logseq-para-pages/master/assets/images/command-0.png" alt="PARA 슬래시 명령어 검색 결과" width="500" />
 
 3. PARA 카테고리를 선택합니다.
 
@@ -59,17 +59,17 @@ Logseq Desktop의 `Settings` → `Advanced`에서 `Developer mode`를 활성화�
    현재 페이지가 `01-projects`, `02-areas`, `03-resources`, `04-archive` 같은 PARA 디렉토리 안에 있으면 카테고리가
    자동으로 선택되고 페이지 이름 입력 단계로 바로 이동합니다. 자동 선택된 카테고리를 바꾸려면 `Change category`를 누릅니다.
 
-   <img src="./assets/images/command-1.png" alt="PARA 카테고리 선택 창" width="500" />
+   <img src="https://raw.githubusercontent.com/bossm0n5t3r/logseq-para-pages/master/assets/images/command-1.png" alt="PARA 카테고리 선택 창" width="500" />
 
-   <img src="./assets/images/command-5.png" alt="현재 PARA 카테고리 자동 선택 화면" width="500" />
+   <img src="https://raw.githubusercontent.com/bossm0n5t3r/logseq-para-pages/master/assets/images/command-5.png" alt="현재 PARA 카테고리 자동 선택 화면" width="500" />
 
 4. 페이지 이름을 입력하고 `Create`를 누릅니다.
 
-   <img src="./assets/images/command-2.png" alt="PARA 페이지 이름 입력 창" width="500" />
+   <img src="https://raw.githubusercontent.com/bossm0n5t3r/logseq-para-pages/master/assets/images/command-2.png" alt="PARA 페이지 이름 입력 창" width="500" />
 
 5. 플러그인이 Markdown 파일을 준비한 뒤 현재 커서 위치에 링크를 삽입합니다.
 
-   <img src="./assets/images/command-4.png" alt="현재 블록에 삽입된 Logseq 페이지 링크" width="300" />
+   <img src="https://raw.githubusercontent.com/bossm0n5t3r/logseq-para-pages/master/assets/images/command-4.png" alt="현재 블록에 삽입된 Logseq 페이지 링크" width="300" />
 
 ## 생성 예시
 
@@ -93,7 +93,7 @@ para:: project
 
 이미 같은 페이지 파일이 있거나 Logseq 기본 `pages` 디렉토리에서 PARA 디렉토리로 이동된 파일도 `para:: ...` 프로퍼티가 없으면 자동으로 추가됩니다.
 
-<img src="./assets/images/command-3.png" alt="PARA 페이지 이름 입력 예시" width="500" />
+<img src="https://raw.githubusercontent.com/bossm0n5t3r/logseq-para-pages/master/assets/images/command-3.png" alt="PARA 페이지 이름 입력 예시" width="500" />
 
 | 선택     | 입력 페이지 이름 | 생성/이동 대상 파일           | 삽입 링크         | 추가 프로퍼티     |
 | -------- | ---------------- | ----------------------------- | ----------------- | ----------------- |
@@ -110,7 +110,7 @@ para:: project
 
 Logseq 플러그인 설정에서 PARA 디렉토리 이름을 변경할 수 있습니다.
 
-<img src="./assets/images/plugins-setting.png" alt="PARA Pages 플러그인 설정" width="720" />
+<img src="https://raw.githubusercontent.com/bossm0n5t3r/logseq-para-pages/master/assets/images/plugins-setting.png" alt="PARA Pages 플러그인 설정" width="720" />
 
 기본값은 아래와 같습니다.
 

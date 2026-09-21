@@ -34,18 +34,18 @@ bun run build
 
 Enable `Developer mode` under `Settings` → `Advanced` in Logseq Desktop.
 
-<img src="./assets/images/settings-advanced-enable-developer-mode.png" alt="Developer mode in Logseq Advanced settings" width="720" />
+<img src="https://raw.githubusercontent.com/bossm0n5t3r/logseq-para-pages/master/assets/images/settings-advanced-enable-developer-mode.png" alt="Developer mode in Logseq Advanced settings" width="720" />
 
 Then open `Plugins`, select `Load unpacked plugin`, and choose this project directory.
 
-<img src="./assets/images/plugins-load-unpacked-plugin.png" alt="Load unpacked plugin in Logseq" width="720" />
+<img src="https://raw.githubusercontent.com/bossm0n5t3r/logseq-para-pages/master/assets/images/plugins-load-unpacked-plugin.png" alt="Load unpacked plugin in Logseq" width="720" />
 
 ## Usage
 
 1. Type `/para` in a Logseq block.
 2. Run `PARA: Create Page` from the slash command list.
 
-   <img src="./assets/images/command-0.png" alt="PARA slash command search result" width="500" />
+   <img src="https://raw.githubusercontent.com/bossm0n5t3r/logseq-para-pages/master/assets/images/command-0.png" alt="PARA slash command search result" width="500" />
 
 3. Select a PARA category.
 
@@ -57,17 +57,17 @@ Then open `Plugins`, select `Load unpacked plugin`, and choose this project dire
 
    If the current page is inside a PARA directory such as `01-projects`, `02-areas`, `03-resources`, or `04-archive`, the plugin automatically selects that category and opens the page name step. Select `Change category` to choose a different category.
 
-   <img src="./assets/images/command-1.png" alt="PARA category selection dialog" width="500" />
+   <img src="https://raw.githubusercontent.com/bossm0n5t3r/logseq-para-pages/master/assets/images/command-1.png" alt="PARA category selection dialog" width="500" />
 
-   <img src="./assets/images/command-5.png" alt="Automatically selected current PARA category" width="500" />
+   <img src="https://raw.githubusercontent.com/bossm0n5t3r/logseq-para-pages/master/assets/images/command-5.png" alt="Automatically selected current PARA category" width="500" />
 
 4. Enter a page name and select `Create`.
 
-   <img src="./assets/images/command-2.png" alt="PARA page name dialog" width="500" />
+   <img src="https://raw.githubusercontent.com/bossm0n5t3r/logseq-para-pages/master/assets/images/command-2.png" alt="PARA page name dialog" width="500" />
 
 5. The plugin prepares the Markdown file and inserts a link at the current cursor position.
 
-   <img src="./assets/images/command-4.png" alt="Logseq page link inserted into the current block" width="300" />
+   <img src="https://raw.githubusercontent.com/bossm0n5t3r/logseq-para-pages/master/assets/images/command-4.png" alt="Logseq page link inserted into the current block" width="300" />
 
 ## Example
 
@@ -91,7 +91,7 @@ When the page is ready, the plugin inserts:
 
 If the page already exists or is moved from Logseq's default `pages` directory, the plugin adds the `para:: ...` property when it is missing.
 
-<img src="./assets/images/command-3.png" alt="PARA page name example" width="500" />
+<img src="https://raw.githubusercontent.com/bossm0n5t3r/logseq-para-pages/master/assets/images/command-3.png" alt="PARA page name example" width="500" />
 
 | Category | Page name     | Created or moved file         | Inserted link     | Added property    |
 | -------- | ------------- | ----------------------------- | ----------------- | ----------------- |
@@ -108,7 +108,7 @@ If the page name includes a `.md` extension, the plugin removes it from both the
 
 You can change the PARA directory names in the Logseq plugin settings.
 
-<img src="./assets/images/plugins-setting.png" alt="PARA Pages plugin settings" width="720" />
+<img src="https://raw.githubusercontent.com/bossm0n5t3r/logseq-para-pages/master/assets/images/plugins-setting.png" alt="PARA Pages plugin settings" width="720" />
 
 The default settings are:
 
