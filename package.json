@@ -1,6 +1,6 @@
 {
   "name": "logseq-para-pages",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Create PARA Markdown files from Logseq page-link patterns.",
   "author": "bossm0n5t3r",
   "license": "MIT",
@@ -16,6 +16,7 @@
   "module": "index.ts",
   "type": "module",
   "private": true,
+  "effect": true,
   "scripts": {
     "build": "bun build ./index.ts --outdir ./dist --target browser --format esm --sourcemap=external",
     "test": "bun test",
