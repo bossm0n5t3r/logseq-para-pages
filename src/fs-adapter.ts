@@ -12,23 +12,41 @@ const browserPath: NodeLikePath = {
   },
 };
 
-const getRequireFunction = (): ((name: string) => unknown) | null => {
-  const host = globalThis as typeof globalThis & {
-    top?: typeof globalThis;
-    parent?: typeof globalThis;
-    require?: (name: string) => unknown;
-  };
-  const candidates = [host, host.top, host.parent] as Array<
-    | (typeof globalThis & { require?: (name: string) => unknown })
-    | null
-    | undefined
-  >;
-
-  for (const candidate of candidates) {
-    if (typeof candidate?.require === "function") return candidate.require;
+const readProperty = <T>(target: unknown, key: string): T | undefined => {
+  if (
+    target === null ||
+    (typeof target !== "object" && typeof target !== "function")
+  ) {
+    return undefined;
   }
 
-  return null;
+  try {
+    return Reflect.get(target, key) as T | undefined;
+  } catch {
+    // Marketplace plugins run in an lsp:// iframe. Reading properties from
+    // its cross-origin parent Window throws a SecurityError.
+    return undefined;
+  }
+};
+
+const getRequireFunction = (): ((name: string) => unknown) | null => {
+  const host: unknown = globalThis;
+  const hostRequire = readProperty<unknown>(host, "require");
+  if (typeof hostRequire === "function") {
+    return hostRequire as (name: string) => unknown;
+  }
+
+  const top = readProperty<unknown>(host, "top");
+  const topRequire = readProperty<unknown>(top, "require");
+  if (typeof topRequire === "function") {
+    return topRequire as (name: string) => unknown;
+  }
+
+  const parent = readProperty<unknown>(host, "parent");
+  const parentRequire = readProperty<unknown>(parent, "require");
+  return typeof parentRequire === "function"
+    ? (parentRequire as (name: string) => unknown)
+    : null;
 };
 
 const createNodeFileSystemAdapter = (
@@ -125,17 +143,24 @@ const createHostFileSystemAdapter = (apis: HostApis): FileSystemAdapter => {
   };
 };
 
+const readHostApis = (target: unknown): HostApis | null => {
+  const pluralApis = readProperty<unknown>(target, "apis");
+  if (typeof readProperty<unknown>(pluralApis, "doAction") === "function") {
+    return pluralApis as HostApis;
+  }
+
+  const singularApi = readProperty<unknown>(target, "api");
+  return typeof readProperty<unknown>(singularApi, "doAction") === "function"
+    ? (singularApi as HostApis)
+    : null;
+};
+
 const getHostApis = (): HostApis | null => {
-  const host = globalThis as typeof globalThis & {
-    top?: typeof globalThis & { apis?: HostApis };
-    parent?: typeof globalThis & { apis?: HostApis };
-    apis?: HostApis;
-  };
-  const candidates = [host.apis, host.top?.apis, host.parent?.apis];
+  const host: unknown = globalThis;
   return (
-    candidates.find(
-      (apis): apis is HostApis => typeof apis?.doAction === "function",
-    ) ?? null
+    readHostApis(host) ??
+    readHostApis(readProperty(host, "top")) ??
+    readHostApis(readProperty(host, "parent"))
   );
 };
 
